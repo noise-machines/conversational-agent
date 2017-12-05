@@ -3,3 +3,5 @@ typings/
 node_modules/
 *.js.map
 *.ps1
+.env
+.DS_Store

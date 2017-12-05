@@ -7,6 +7,7 @@
     "bluebird": "^3.4.6",
     "botbuilder": "^3.4.2",
     "botbuilder-azure": "0.0.1",
+    "dotenv": "^4.0.0",
     "lodash": "^4.15.0",
     "lorem-ipsum": "^1.0.3",
     "node-uuid": "^1.4.7",
@@ -14,8 +15,8 @@
     "restify": "^4.1.1"
   },
   "devDependencies": {
-      "restify": "^4.1.1"
-  },  
+    "restify": "^4.1.1"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js"
