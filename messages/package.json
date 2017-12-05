@@ -8,8 +8,11 @@
     "botbuilder": "^3.4.2",
     "botbuilder-azure": "0.0.1",
     "dotenv": "^4.0.0",
+    "is-probably-american-name": "^1.0.1",
+    "json-stringify-safe": "^5.0.1",
     "lodash": "^4.15.0",
     "lorem-ipsum": "^1.0.3",
+    "moment": "^2.19.3",
     "node-uuid": "^1.4.7",
     "request": "^2.74.0",
     "restify": "^4.1.1"

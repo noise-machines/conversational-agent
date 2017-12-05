@@ -12,6 +12,7 @@ const _ = require('lodash')
 const builder = require('botbuilder')
 const botBuilderAzure = require('botbuilder-azure')
 const restify = require('restify')
+const moment = require('moment')
 const {
   getJoke,
   getHowAreYou,
@@ -26,8 +27,6 @@ const {
   searchSynonyms,
   simpleHelpOptions
 } = require('./utterances')
-const registerRailroadPrompt = require('./railroadPrompt')
-
 const useEmulator = process.env.NODE_ENV === 'development'
 
 const connector = useEmulator
@@ -39,26 +38,39 @@ const connector = useEmulator
       openIdMetadata: process.env.BOT_OPEN_ID_METADATA
     })
 
-const bot = new builder.UniversalBot(connector, [
-  session => {
-    builder.Prompts.railroad(session, 'hi', [
-      'Please say "hi."',
-      ["That's unacceptable.", 'Could you say "hi", please?'],
-      'Say "hi."'
-    ])
-  },
-  session => {
-    session.send('Finally.')
-  },
-  session => {
-    builder.Prompts.railroad(session, 'hi', [
-      'Please say "hi."',
-      ["That's unacceptable.", 'Could you say "hi", please?'],
-      'Say "hi."'
-    ])
-  }
-])
-registerRailroadPrompt(bot)
+const bot = new builder.UniversalBot(connector)
+
+// Register custom prompts
+require('./prompts/railroad')(bot)
+require('./prompts/heckleAndMoveOn')(bot)
+
+// Register dialogs
+require('./dialogs/welcomeBack')(bot)
+require('./dialogs/tutorial')(bot)
+require('./dialogs/restartTutorial')(bot)
+
+const recognizer = new builder.LuisRecognizer(process.env.LUIS_ENDPOINT)
+const intents = new builder.IntentDialog({ recognizers: [recognizer] })
+  // .matches('<myIntent>')... See details at http://docs.botframework.com/builder/node/guides/understanding-natural-language/
+  .onBegin((session, args, next) => {
+    if (session.userData.hasCompletedTutorial) {
+      session.beginDialog('welcomeBack')
+    } else {
+      session.userData.firstMeeting = {
+        message: session.message,
+        dateTime: moment().toISOString()
+      }
+      session.save()
+      session.beginDialog('tutorial')
+    }
+  })
+  .matches('Tutorial', (session, args, next) => {
+    console.log('matched tutorial intent')
+    session.beginDialog('restartTutorial')
+  })
+
+bot.dialog('/', intents)
+
 /*
 const searchQuestionText =
   "You can say *search* followed by the A.I. concept you're interested in and I'll see what I can find."
