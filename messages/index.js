@@ -50,20 +50,24 @@ require('./dialogs/tutorial')(bot)
 require('./dialogs/restartTutorial')(bot)
 require('./dialogs/help')(bot)
 require('./dialogs/searchConcept')(bot)
+require('./dialogs/moreResults')(bot)
 
 const recognizer = new builder.LuisRecognizer(process.env.LUIS_ENDPOINT)
 const intents = new builder.IntentDialog({ recognizers: [recognizer] })
   // .matches('<myIntent>')... See details at http://docs.botframework.com/builder/node/guides/understanding-natural-language/
   .onBegin((session, args, next) => {
-    if (session.userData.hasCompletedTutorial) {
-      session.beginDialog('welcomeBack')
-    } else {
+    const didTimeout = false
+    if (!session.userData.hasCompletedTutorial) {
       session.userData.firstMeeting = {
         message: session.message,
         dateTime: moment().toISOString()
       }
       session.save()
       session.beginDialog('tutorial')
+    } else if (didTimeout) {
+      session.beginDialog('welcomeBack')
+    } else {
+      next()
     }
   })
   .matches('Tutorial', (session, args, next) => {
@@ -73,21 +77,12 @@ const intents = new builder.IntentDialog({ recognizers: [recognizer] })
     session.beginDialog('help')
   })
   .matches('SearchConcept', (session, args, next) => {
-    console.log(JSON.stringify(args))
     session.beginDialog('searchConcept')
   })
   .matches('More', session => {
-    // if (session.userData.query) {
-    //   session.send('Let me see what else I can find...')
-    //   // Next Page
-    //   session.userData.query.pageNumber++
-    //   performSearchWithQuery(session, session.userData.query)
-    // } else {
-    //   session.send(
-    //     "Sorry. I don't remember you searching for anything so I can't show more results."
-    //   )
-    // }
+    session.beginDialog('moreResults')
   })
+  .onDefault()
 
 bot.dialog('/', intents)
 
