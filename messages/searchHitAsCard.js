@@ -1,7 +1,15 @@
 const builder = require('botbuilder')
 
+const truncate = (text, maxLength = 140) => {
+  if (text.length > maxLength) {
+    return text.substring(0, maxLength - 3).trim() + '...'
+  } else {
+    return text
+  }
+}
+
 module.exports = function searchHitAsCard(session, showSave, searchHit) {
-  var buttons = showSave
+  const buttons = showSave
     ? [
         new builder.CardAction()
           .type('imBack')
@@ -15,7 +23,7 @@ module.exports = function searchHitAsCard(session, showSave, searchHit) {
     .buttons(buttons)
 
   if (searchHit.description) {
-    card.subtitle(searchHit.description)
+    card.subtitle(truncate(searchHit.description))
   }
 
   if (searchHit.imageUrl) {
