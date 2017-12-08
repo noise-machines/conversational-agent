@@ -28,7 +28,10 @@ const {
   simpleHelpOptions
 } = require('./utterances')
 const useEmulator = process.env.NODE_ENV === 'development'
+
+// Trigger redeploy
 console.log('starting neona')
+
 const connector = useEmulator
   ? new builder.ChatConnector()
   : new botBuilderAzure.BotServiceConnector({
