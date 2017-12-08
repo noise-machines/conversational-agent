@@ -2,7 +2,7 @@ const builder = require('botbuilder')
 const _ = require('lodash')
 const searchHitAsCard = require('../searchHitAsCard')
 
-const searchResults = [
+const firstResults = [
   {
     key: 'Leaf AI',
     title: 'Leaf AI',
@@ -22,6 +22,29 @@ const searchResults = [
       'Artificial general intelligence (AGI) is the intelligence of a machine that could successfully perform any intellectual task that a human being can.'
   }
 ]
+
+const moreResults = [
+  {
+    key: 'Weak AI',
+    title: 'Weak AI',
+    description:
+      'Weak artificial intelligence (weak AI), also known as narrow AI, is artificial intelligence that is focused on one narrow task.'
+  },
+  {
+    key: 'AI-complete',
+    title: 'AI-complete',
+    description:
+      'In the field of artificial intelligence, the most difficult problems are informally known as AI-complete or AI-hard, implying that the difficulty of these computational problems is equivalent to that of solving the central artificial intelligence problem—making computers as intelligent as people, or strong AI.'
+  },
+  {
+    key: 'Nouvelle AI',
+    title: 'Nouvelle AI',
+    description:
+      'Nouvelle artificial intelligence (AI) is an approach to artificial intelligence pioneered in the 1980s by Rodney Brooks, who was then part of MIT artificial intelligence laboratory.'
+  }
+]
+
+const allSearchResults = [...firstResults, ...moreResults]
 
 const tutorial = [
   session => {
@@ -48,7 +71,7 @@ const tutorial = [
     ])
   },
   session => {
-    const cards = searchResults.map(searchResult =>
+    const cards = firstResults.map(searchResult =>
       searchHitAsCard(session, true, searchResult)
     )
     const message = new builder.Message(session)
@@ -56,7 +79,25 @@ const tutorial = [
       .text("Here's what my knowledge base has about A.I.")
       .attachments(cards)
     session.send(message)
-    const expectedResponses = _.map(searchResults, 'key')
+    session.send(
+      "I'll let you know when there are more results. Like now. There are more results."
+    )
+    session.send('')
+    builder.Prompts.heckleAndMoveOn(session, 'more results', [
+      'You can see them by saying "more results".',
+      `Was that "more results"? Let's pretend it was.`
+    ])
+  },
+  (session, results) => {
+    const cards = moreResults.map(searchResult =>
+      searchHitAsCard(session, true, searchResult)
+    )
+    const message = new builder.Message(session)
+      .attachmentLayout(builder.AttachmentLayout.carousel)
+      .attachments(cards)
+    session.send(message)
+
+    const expectedResponses = _.map(moreResults, 'key')
     builder.Prompts.railroad(session, expectedResponses, [
       'Try hitting save on one of those',
       [
@@ -85,7 +126,7 @@ const tutorial = [
   session => {
     const isSavedResult = result =>
       result.key === session.dialogData.savedResultKey
-    const savedResult = _.find(searchResults, isSavedResult)
+    const savedResult = _.find(allSearchResults, isSavedResult)
     const card = searchHitAsCard(session, false, savedResult)
     const message = new builder.Message(session)
       .attachmentLayout(builder.AttachmentLayout.carousel)
@@ -94,7 +135,9 @@ const tutorial = [
     session.send(
       "Okay, that's it. Feel free to search, save, and list to your heart's content."
     )
-    session.send('Oh, and say "help" to see my pre-recorded help message.')
+    session.send(
+      'Oh, and say "help" to see my pre-recorded help message. If you want to do that all again, say "tutorial".'
+    )
     session.userData.hasCompletedTutorial = true
     session.save()
     session.endDialog()
