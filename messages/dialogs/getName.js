@@ -8,7 +8,6 @@ const getName = [
   },
   (session, results, next) => {
     const name = results.response
-    console.log(name)
     const firstName = name.split(' ')[0]
     session.dialogData.name = name
     if (isProbablyAmericanName(firstName)) {

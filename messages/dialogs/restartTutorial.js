@@ -14,9 +14,11 @@ const restartTutorial = [
     const firstMeetingTime = moment(firstMeeting.dateTime).format('h:mm a')
     session.send(`Imagine it's ${firstMeetingDay}, at ${firstMeetingTime}.`)
     session.send(
-      `You started off with ${firstMeeting.message.text}, then I said: `
+      `You started off with "${firstMeeting.message.text}", and I said: `
     )
     session.beginDialog('tutorial')
+  },
+  session => {
     session.endDialog()
   }
 ]
