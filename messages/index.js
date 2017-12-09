@@ -74,6 +74,7 @@ require('./dialogs/restartTutorial')(bot)
 require('./dialogs/help')(bot)
 require('./dialogs/searchConcept')(bot)
 require('./dialogs/moreResults')(bot)
+require('./dialogs/list')(bot)
 
 const recognizer = new builder.LuisRecognizer(process.env.LUIS_ENDPOINT)
 const intents = new builder.IntentDialog({ recognizers: [recognizer] })
@@ -108,7 +109,44 @@ const intents = new builder.IntentDialog({ recognizers: [recognizer] })
   .matches('More', session => {
     session.beginDialog('moreResults')
   })
-  .onDefault()
+  .matches('List', session => {
+    session.beginDialog('list')
+  })
+  .onDefault((session, args) => {
+    const query = args.query || session.userData.query || emptyQuery()
+    const savedArticles =
+      args.savedArticles || session.userData.savedArticles || []
+    session.userData.savedArticles = savedArticles
+    session.userData.query = query
+
+    const selectedKey = session.message.text
+    var hit = null
+    if (session.userData.searchResponse) {
+      hit = _.find(session.userData.searchResponse.results, [
+        'key',
+        selectedKey
+      ])
+    }
+    if (!hit) {
+      // Un-recognized savedArticles
+      session.send(
+        "Sorry, didn't catch that. Was working on a cost function for Calvinball: https://xkcd.com/1002/"
+      )
+      session.send('Maybe we can play some later.')
+      session.send(
+        `Don't forget you can use "search" to search for A.I. topics, or "list" to see the articles you've saved.`
+      )
+    } else {
+      // Add savedArticles
+      if (!_.find(savedArticles, ['key', hit.key])) {
+        savedArticles.push(hit)
+        session.userData.savedArticles = savedArticles
+        session.save()
+      }
+
+      session.send(`Alright, I'll remember ${hit.title} forever.`)
+    }
+  })
 
 bot.dialog('/', intents)
 
@@ -180,57 +218,8 @@ var intents = new builder.IntentDialog({ recognizers: [recognizer] })
       "I'm Futurisma, a conversational agent that teaches people about artificial intelligence."
     )
   )
-  .onDefault((session, args) => {
-    var query = args.query || session.userData.query || emptyQuery()
-    var selection = args.selection || session.userData.selection || []
-    session.userData.selection = selection
-    session.userData.query = query
-
-    var selectedKey = session.message.text
-    var hit = null
-    if (session.userData.searchResponse) {
-      hit = _.find(session.userData.searchResponse.results, [
-        'key',
-        selectedKey
-      ])
-    }
-    if (!hit) {
-      // Un-recognized selection
-      session.send(
-        "Sorry, I did not understand '%s'. Type 'help' if you need assistance.",
-        session.message.text
-      )
-    } else {
-      // Add selection
-      if (!_.find(selection, ['key', hit.key])) {
-        selection.push(hit)
-        session.userData.selection = selection
-        // TODO: Test that this persists no matter what dialogues are called.
-        session.save()
-      }
-
-      // Multi-select -> Continue?
-      session.send('%s was added to your list!', hit.title)
-    }
-  })
 
 bot.dialog('/', intents)
-
-function listAddedItems(session) {
-  var selection = session.userData.selection || []
-  if (selection.length === 0) {
-    session.send('You have not added anything yet.')
-  } else {
-    var actions = selection.map(hit =>
-      builder.CardAction.imBack(session, hit.title)
-    )
-    var message = new builder.Message(session)
-      .text("Here's what you've added to your list so far:")
-      .attachments(selection.map(searchHitAsCard.bind(null, false)))
-      .attachmentLayout(builder.AttachmentLayout.list)
-    session.send(message)
-  }
-}
 */
 // Testing
 if (useEmulator) {
