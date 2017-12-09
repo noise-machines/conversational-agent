@@ -38,7 +38,30 @@ const connector = useEmulator
       openIdMetadata: process.env.BOT_OPEN_ID_METADATA
     })
 
+const TIMEOUT_IN_MINUTES = 10
 const bot = new builder.UniversalBot(connector)
+
+bot.use({
+  botbuilder: [
+    // Middleware that intercepts incoming messages once they've been bound to a session
+    (session, next) => {
+      const currentMessageAt = moment()
+      if (session.userData.currentMessageAt) {
+        const previousMessageAt = moment(session.userData.currentMessageAt) // Used to be the current message, now it's the previous message
+        session.userData.minutesBetweenPreviousAndCurrentMessage = moment().diff(
+          previousMessageAt,
+          'minutes'
+        )
+      } else {
+        session.userData.minutesBetweenPreviousAndCurrentMessage =
+          global.Infinity
+      }
+      session.userData.currentMessageAt = currentMessageAt.toISOString()
+      session.save()
+      next()
+    }
+  ]
+})
 
 // Register custom prompts
 require('./prompts/railroad')(bot)
@@ -56,7 +79,9 @@ const recognizer = new builder.LuisRecognizer(process.env.LUIS_ENDPOINT)
 const intents = new builder.IntentDialog({ recognizers: [recognizer] })
   // .matches('<myIntent>')... See details at http://docs.botframework.com/builder/node/guides/understanding-natural-language/
   .onBegin((session, args, next) => {
-    const didTimeout = false
+    const didTimeout =
+      session.userData.minutesBetweenPreviousAndCurrentMessage >
+      TIMEOUT_IN_MINUTES
     if (!session.userData.hasCompletedTutorial) {
       session.userData.firstMeeting = {
         message: session.message,
@@ -66,6 +91,7 @@ const intents = new builder.IntentDialog({ recognizers: [recognizer] })
       session.beginDialog('tutorial')
     } else if (didTimeout) {
       session.beginDialog('welcomeBack')
+      next()
     } else {
       next()
     }
