@@ -131,6 +131,13 @@ const intents = new builder.IntentDialog({ recognizers: [recognizer] })
   .matches('List', session => {
     session.beginDialog('list')
   })
+  .matches('Hello', session => {
+    if (session.userData.name) {
+      session.send(`Hi ${session.userData.name}`)
+    } else {
+      session.send('Hi anon.')
+    }
+  })
   .onDefault((session, args) => {
     const didSave = trySaveArticle(session, args)
     if (!didSave) {
