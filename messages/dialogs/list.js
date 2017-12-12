@@ -14,8 +14,8 @@ const list = [
         .attachments(cards)
         .attachmentLayout(builder.AttachmentLayout.list)
       session.send(message)
-      session.endDialog()
     }
+    session.endDialog()
   }
 ]
 
