@@ -7,6 +7,7 @@ const help = [
     session.send(
       `Or say "tutorial" and I'll be slightly miffed that you don't even remember the first time we met.`
     )
+    session.endDialog()
   }
 ]
 
