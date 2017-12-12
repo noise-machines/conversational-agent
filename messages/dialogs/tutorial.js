@@ -1,6 +1,7 @@
 const builder = require('botbuilder')
 const _ = require('lodash')
 const searchHitAsCard = require('../searchHitAsCard')
+const moment = require('moment')
 
 const firstResults = [
   {
@@ -48,6 +49,13 @@ const allSearchResults = [...firstResults, ...moreResults]
 
 const tutorial = [
   session => {
+    if (!session.userData.hasCompletedTutorial) {
+      session.userData.firstMeeting = {
+        message: session.message,
+        dateTime: moment().toISOString()
+      }
+      session.save()
+    }
     session.send("Hi, I'm Neona. I simulate non-corporeal consciousness.")
     session.send('My purpose is to help you learn about A.I.')
     session.beginDialog('getName')
@@ -99,7 +107,7 @@ const tutorial = [
 
     const expectedResponses = _.map(moreResults, 'key')
     builder.Prompts.railroad(session, expectedResponses, [
-      'Try hitting save on one of those',
+      'Try hitting save on one of those.',
       [
         "Look. I know I'm a machine, but let's not forget that electricity costs money.",
         "This conversation isn't free for either of us.",

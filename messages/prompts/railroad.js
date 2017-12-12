@@ -75,7 +75,7 @@ const register = bot => {
   bot.dialog('railroadPrompt', railroadPrompt)
 
   builder.Prompts.railroad = (session, expectedResponses, prompts, options) => {
-    var args = options || {}
+    const args = options || {}
     args.expectedResponses = expectedResponses
     args.prompts = prompts || options.prompts
     session.beginDialog('railroadPrompt', args)

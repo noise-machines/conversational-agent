@@ -1,10 +1,10 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 See package.json.
 
 Inspired By:
 + http://docs.botframework.com/builder/node/guides/understanding-natural-language/
 + https://github.com/Microsoft/BotBuilder-Samples/tree/master/Node/demo-Search
------------------------------------------------------------------------------*/
+----------------------------------------------------------------------------- */
 
 'use strict'
 require('dotenv').config()
@@ -12,21 +12,21 @@ const _ = require('lodash')
 const builder = require('botbuilder')
 const botBuilderAzure = require('botbuilder-azure')
 const restify = require('restify')
-const moment = require('moment')
-const {
-  getJoke,
-  getHowAreYou,
-  getYoureWelcome,
-  getCompliment,
-  getThankYou,
-  getIDontKnow,
-  getCool,
-  getHello,
-  getSorry,
-  getGoodbye,
-  searchSynonyms,
-  simpleHelpOptions
-} = require('./utterances')
+const minutesBetweenPreviousAndCurrentMessage = require('./middleware/minutesBetweenPreviousAndCurrentMessage')
+// const {
+//   getJoke,
+//   getHowAreYou,
+//   getYoureWelcome,
+//   getCompliment,
+//   getThankYou,
+//   getIDontKnow,
+//   getCool,
+//   getHello,
+//   getSorry,
+//   getGoodbye,
+//   searchSynonyms,
+//   simpleHelpOptions
+// } = require('./utterances')
 const useEmulator = process.env.NODE_ENV === 'development'
 
 const connector = useEmulator
@@ -44,22 +44,7 @@ const bot = new builder.UniversalBot(connector)
 bot.use({
   botbuilder: [
     // Middleware that intercepts incoming messages once they've been bound to a session
-    (session, next) => {
-      const currentMessageAt = moment()
-      if (session.userData.currentMessageAt) {
-        const previousMessageAt = moment(session.userData.currentMessageAt) // Used to be the current message, now it's the previous message
-        session.userData.minutesBetweenPreviousAndCurrentMessage = moment().diff(
-          previousMessageAt,
-          'minutes'
-        )
-      } else {
-        session.userData.minutesBetweenPreviousAndCurrentMessage =
-          global.Infinity
-      }
-      session.userData.currentMessageAt = currentMessageAt.toISOString()
-      session.save()
-      next()
-    }
+    minutesBetweenPreviousAndCurrentMessage
   ]
 })
 
@@ -75,6 +60,45 @@ require('./dialogs/help')(bot)
 require('./dialogs/searchConcept')(bot)
 require('./dialogs/moreResults')(bot)
 require('./dialogs/list')(bot)
+require('./dialogs/unrecognizedCommand')(bot)
+
+const trySaveArticle = (session, args) => {
+  const queryOptions = args.queryOptions || session.userData.queryOptions
+  const savedArticles =
+    args.savedArticles || session.userData.savedArticles || []
+  session.userData.savedArticles = savedArticles
+  session.userData.queryOptions = queryOptions
+
+  const selectedKey = session.message.text
+  var hit = null
+  if (session.userData.searchResponse) {
+    hit = _.find(session.userData.searchResponse.results, { key: selectedKey })
+  }
+  // Couldn't find the key in the latest search results, so don't save anything.
+  if (!hit) {
+    return false
+  }
+  const hitWasAlreadySaved = _.find(savedArticles, { key: hit.key })
+  if (hitWasAlreadySaved) {
+    session.send(
+      `You already saved ${
+        hit.title
+      }. Say "list" to see the articles you've already saved.`
+    )
+    return true
+  }
+  const shouldSaveArticle = !hitWasAlreadySaved
+  if (shouldSaveArticle) {
+    savedArticles.push(hit)
+    session.userData.savedArticles = savedArticles
+    session.save()
+    const articles = savedArticles.length === 1 ? 'article' : 'articles'
+    session.send(
+      `Got it. That's ${savedArticles.length} ${articles} saved so far.`
+    )
+  }
+  return shouldSaveArticle
+}
 
 const recognizer = new builder.LuisRecognizer(process.env.LUIS_ENDPOINT)
 const intents = new builder.IntentDialog({ recognizers: [recognizer] })
@@ -84,15 +108,10 @@ const intents = new builder.IntentDialog({ recognizers: [recognizer] })
       session.userData.minutesBetweenPreviousAndCurrentMessage >
       TIMEOUT_IN_MINUTES
     if (!session.userData.hasCompletedTutorial) {
-      session.userData.firstMeeting = {
-        message: session.message,
-        dateTime: moment().toISOString()
-      }
-      session.save()
       session.beginDialog('tutorial')
     } else if (didTimeout) {
       session.beginDialog('welcomeBack')
-      next()
+      // next()
     } else {
       next()
     }
@@ -113,38 +132,9 @@ const intents = new builder.IntentDialog({ recognizers: [recognizer] })
     session.beginDialog('list')
   })
   .onDefault((session, args) => {
-    const query = args.query || session.userData.query || emptyQuery()
-    const savedArticles =
-      args.savedArticles || session.userData.savedArticles || []
-    session.userData.savedArticles = savedArticles
-    session.userData.query = query
-
-    const selectedKey = session.message.text
-    var hit = null
-    if (session.userData.searchResponse) {
-      hit = _.find(session.userData.searchResponse.results, [
-        'key',
-        selectedKey
-      ])
-    }
-    if (!hit) {
-      // Un-recognized savedArticles
-      session.send(
-        "Sorry, didn't catch that. Was working on a cost function for Calvinball: https://xkcd.com/1002/"
-      )
-      session.send('Maybe we can play some later.')
-      session.send(
-        `Don't forget you can use "search" to search for A.I. topics, or "list" to see the articles you've saved.`
-      )
-    } else {
-      // Add savedArticles
-      if (!_.find(savedArticles, ['key', hit.key])) {
-        savedArticles.push(hit)
-        session.userData.savedArticles = savedArticles
-        session.save()
-      }
-
-      session.send(`Alright, I'll remember ${hit.title} forever.`)
+    const didSave = trySaveArticle(session, args)
+    if (!didSave) {
+      session.beginDialog('unrecognizedCommand')
     }
   })
 
@@ -221,12 +211,13 @@ var intents = new builder.IntentDialog({ recognizers: [recognizer] })
 
 bot.dialog('/', intents)
 */
+
 // Testing
 if (useEmulator) {
   var emulatorServer = restify.createServer()
-  emulatorServer.listen(3978, function() {
-    console.log('using LUIS at ' + process.env.LUIS_ENDPOINT)
-    console.log('test bot endpoint at http://localhost:3978/api/messages')
+  emulatorServer.listen(3978, () => {
+    console.log('Using LUIS endpoint ' + process.env.LUIS_ENDPOINT)
+    console.log('Test bot endpoint at http://localhost:3978/api/messages')
   })
   emulatorServer.post('/api/messages', connector.listen())
 } else {

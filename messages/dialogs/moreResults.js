@@ -1,11 +1,14 @@
-const performSearchWithQuery = require('../performSearchWithQuery')
+const { searchWithQueryOptions } = require('../search')
+const renderSearchResponse = require('../renderSearchResponse')
 
 const moreResults = [
   session => {
-    if (session.userData.query) {
-      session.userData.query.pageNumber++
+    if (session.userData.queryOptions) {
+      session.userData.queryOptions.pageNumber++
       session.save()
-      performSearchWithQuery(session, session.userData.query)
+      searchWithQueryOptions(session.userData.queryOptions).then(response =>
+        renderSearchResponse(session, response)
+      )
     } else {
       session.send(
         "Sorry. I don't remember you searching for anything so I can't show more results."
