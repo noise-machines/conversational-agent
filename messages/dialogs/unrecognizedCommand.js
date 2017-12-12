@@ -14,9 +14,17 @@ const handleSearchResponse = (session, response) => {
       } related to ${session.message.text}. Should I show them?`
     )
   } else {
-    session.send(
-      "Sorry, didn't catch that. Was working on a cost function for Calvinball: https://xkcd.com/1002/"
-    )
+    session.send({
+      text:
+        "Sorry, didn't catch that. Was working on a cost function for Calvinball.",
+      attachments: [
+        {
+          contentType: 'image/png',
+          contentUrl: 'https://imgs.xkcd.com/comics/game_ais.png',
+          name: 'XKCD: Game AIs'
+        }
+      ]
+    })
     session.send('Maybe we can play some later.')
     session.send(
       `Don't forget you can use "search" to search for A.I. topics, or "list" to see the articles you've saved.`

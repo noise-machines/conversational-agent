@@ -56,7 +56,16 @@ const tutorial = [
       }
       session.save()
     }
-    session.send("Hi, I'm Neona. I simulate non-corporeal consciousness.")
+    session.send({
+      text: "Hi, I'm Neona. I simulate non-corporeal consciousness.",
+      attachments: [
+        {
+          contentType: 'image/jpeg',
+          contentUrl: 'https://i.imgur.com/Y4VYJaL.jpg',
+          name: 'Neona'
+        }
+      ]
+    })
     session.send('My purpose is to help you learn about A.I.')
     session.beginDialog('getName')
   },
@@ -66,10 +75,18 @@ const tutorial = [
     session.send(
       `Okay, ${
         session.userData.name
-      }. Just so we're on the same page, I like humans. But here's a recording` +
-        `of the activation patterns in my simulated consciousness over the past` +
-        `twenty-four hours: https://giphy.com/gifs/WMiPq7mlV0xmU/html5`
+      }. Just so we're on the same page, I like humans. But here's a recording ` +
+        `of the activation patterns in my simulated consciousness over the past ` +
+        `twenty-four hours:`
     )
+    const gif = new builder.AnimationCard(session)
+      .image(
+        builder.CardImage.create(session, 'http://i.imgur.com/gds62AZ.jpg')
+      )
+      .media([{ url: 'https://media.giphy.com/media/WMiPq7mlV0xmU/giphy.gif' }])
+
+    const gifMessage = new builder.Message(session).addAttachment(gif)
+    session.send(gifMessage)
     session.send(
       "I think you get the idea. I'm happy to help, but let's just try and stay focused."
     )
