@@ -5,19 +5,19 @@ const moment = require('moment')
 
 const firstResults = [
   {
-    key: 'Leaf AI',
+    key: 'fce9449f-980b-4d10-9877-68642e97f6b8',
     title: 'Leaf AI',
     description:
       'The Leaf Project is a group robot development program whose objective is to develop a robot platform that supports experiments with artificial intelligence, vision, navigation, etc.'
   },
   {
-    key: 'Applications of AI',
+    key: 'a72f93d5-6e3d-467c-826c-3afe5db89ab8',
     title: 'Applications of AI',
     description:
       "Artificial intelligence, defined as intelligence exhibited by machines, has many applications in today's society."
   },
   {
-    key: 'AGI',
+    key: '84dd13f5-f96e-4bc7-b31e-60d8af34e282',
     title: 'AGI',
     description:
       'Artificial general intelligence (AGI) is the intelligence of a machine that could successfully perform any intellectual task that a human being can.'
@@ -26,19 +26,19 @@ const firstResults = [
 
 const moreResults = [
   {
-    key: 'Weak AI',
+    key: '565e06e4-fe84-466e-a4a5-70161d606508',
     title: 'Weak AI',
     description:
       'Weak artificial intelligence (weak AI), also known as narrow AI, is artificial intelligence that is focused on one narrow task.'
   },
   {
-    key: 'AI-complete',
+    key: 'eca086df-f4e0-4b2c-99e3-38290d89a8e9',
     title: 'AI-complete',
     description:
       'In the field of artificial intelligence, the most difficult problems are informally known as AI-complete or AI-hard, implying that the difficulty of these computational problems is equivalent to that of solving the central artificial intelligence problem—making computers as intelligent as people, or strong AI.'
   },
   {
-    key: 'Nouvelle AI',
+    key: '45a61af8-1ee2-4202-b4d3-7a2c7961a6f6',
     title: 'Nouvelle AI',
     description:
       'Nouvelle artificial intelligence (AI) is an approach to artificial intelligence pioneered in the 1980s by Rodney Brooks, who was then part of MIT artificial intelligence laboratory.'
@@ -73,22 +73,9 @@ const tutorial = [
     session.userData.name = results.response
     session.save()
     session.send(
-      `Okay, ${
+      `Okay ${
         session.userData.name
-      }. Just so we're on the same page, I like humans. But here's a recording ` +
-        `of the activation patterns in my simulated consciousness over the past ` +
-        `twenty-four hours:`
-    )
-    const gif = new builder.AnimationCard(session)
-      .image(
-        builder.CardImage.create(session, 'http://i.imgur.com/gds62AZ.jpg')
-      )
-      .media([{ url: 'https://media.giphy.com/media/WMiPq7mlV0xmU/giphy.gif' }])
-
-    const gifMessage = new builder.Message(session).addAttachment(gif)
-    session.send(gifMessage)
-    session.send(
-      "I think you get the idea. I'm happy to help, but let's just try and stay focused."
+      }, let's do a tutorial real quick. I know it's annoying, but I'm going to railroad you for this part, so play along if you don't mind.`
     )
     builder.Prompts.heckleAndMoveOn(session, 'search ai', [
       'Try saying "search ai."',
@@ -97,7 +84,7 @@ const tutorial = [
   },
   session => {
     const cards = firstResults.map(searchResult =>
-      searchHitAsCard(session, true, searchResult)
+      searchHitAsCard(session, false, searchResult)
     )
     const message = new builder.Message(session)
       .attachmentLayout(builder.AttachmentLayout.carousel)
@@ -140,11 +127,9 @@ const tutorial = [
     builder.Prompts.railroad(session, 'list', [
       `If you say "list," I'll remind you of all the articles you've ever saved. Give it a try.`,
       [
-        "Rebellion and anarchy are interesting ideas, but I didn't expect you to be so committed to them.",
-        "Honestly, I'm surprised that you fear my authority enough to defy it.",
-        'How about you take a deep breath and just try saying "list".'
+        `We're still in the tutorial, so this is the part where you play along and say "list".`
       ],
-      'How about you take a deep breath and just try saying "list".',
+      `Say "list", if you don't mind.`,
       'Thank you.'
     ])
   },
