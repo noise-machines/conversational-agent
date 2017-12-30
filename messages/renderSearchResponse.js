@@ -6,7 +6,8 @@ const renderSearchResponse = (session, response) => {
     session.send("Sorry, I didn't find any matches.")
   } else {
     // Save state
-    session.userData.searchResponse = response
+    const searchResponses = session.userData.searchResponses || []
+    session.userData.searchResponses = [response, ...searchResponses]
     session.userData.queryOptions = response.queryOptions
     session.save()
 

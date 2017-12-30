@@ -71,8 +71,13 @@ const trySaveArticle = (session, args) => {
 
   const selectedKey = session.message.text
   var hit = null
-  if (session.userData.searchResponse) {
-    hit = _.find(session.userData.searchResponse.results, { key: selectedKey })
+  if (session.userData.searchResponses) {
+    const nestedResults = session.userData.searchResponses.map(
+      response => response.results
+    )
+    const results = _.flatten(nestedResults)
+
+    hit = _.find(results, { key: selectedKey })
   }
   // Couldn't find the key in the latest search results, so don't save anything.
   if (!hit) {
