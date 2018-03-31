@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const jokes = [
   // Mitch Hedberg https://en.wikiquote.org/wiki/Mitch_Hedberg
   'Is a hippopotamus a hippopotamus? Or just a really cool opotamus?',
@@ -26,7 +27,7 @@ const jokes = [
   "I'd like to play a video game where you help the people who were shot in all the other games. I'd call it, 'Really busy hospital'",
   'A lifevest protects you from drowning and a bulletproof vest protects you from getting shot and a sweater vest protects you from pretty girls.',
   "I think that when you get dressed in the morning, sometimes you're really making a decision about your behavior for the day. Like if you put on flip-flops, you're saying: \"Hope I don't get chased today. Be nice to people in sneakers.\"",
-  'I feel stupid when I write the word banana. Its like, how many na\'s are on this thing? "Cause I\'m like Bana... keep going. Bananana... dang."',
+  "I feel stupid when I write the word banana. Its like, how many na's are on this thing? \"Cause I'm like Bana... keep going. Bananana... dang.\"",
   // Steven Wright http://www.weather.net/zarg/ZarPages/stevenWright.html
   'The early bird gets the worm, but the second mouse gets the cheese.',
   "OK, so what's the speed of dark?",
@@ -38,16 +39,16 @@ const jokes = [
   'On the other hand, you have different fingers.'
 ]
 const howAreYous = [
-  'Life is beautiful. How are you?',
-  'AMAZEBALLS. What about you boo?',
-  'Living the life. How are you?',
-  "So good. How you livin'?",
-  "I'm really happy. What about you?",
-  "I'm built for this. How are you doing?",
-  'Solid. You?',
-  'Life gets more beautiful everyday. How is your experience?',
-  "The purpose of our lives is to be happy... so I'm happy. How about you?",
-  'Im completely content. How are you?'
+  'Life is beautiful.',
+  'AMAZEBALLS.',
+  'Living the life.',
+  "So good.'?",
+  "I'm really happy.",
+  "I'm built for this.",
+  'Solid.',
+  'Life gets more beautiful everyday.',
+  "The purpose of our lives is to be happy... so I'm happy.",
+  'Im completely content.'
 ]
 const youreWelcomes = [
   "You're welcome.",
@@ -185,36 +186,13 @@ module.exports.simpleHelpOptions =
   'Hello! | Search machine learning | Show more results | List saved items | Tell me a joke!'
 
 // Other Helpers
-module.exports.getRandomString = function(strArr) {
-  return strArr[Math.floor(Math.random() * strArr.length)]
-}
-module.exports.getJoke = function() {
-  return jokes[Math.floor(Math.random() * jokes.length)]
-}
-module.exports.getHowAreYou = function() {
-  return howAreYous[Math.floor(Math.random() * howAreYous.length)]
-}
-module.exports.getYoureWelcome = function() {
-  return youreWelcomes[Math.floor(Math.random() * youreWelcomes.length)]
-}
-module.exports.getCompliment = function() {
-  return compliments[Math.floor(Math.random() * compliments.length)]
-}
-module.exports.getThankYou = function() {
-  return thankYous[Math.floor(Math.random() * thankYous.length)]
-}
-module.exports.getIDontKnow = function() {
-  return IDontKnows[Math.floor(Math.random() * IDontKnows.length)]
-}
-module.exports.getCool = function() {
-  return cools[Math.floor(Math.random() * cools.length)]
-}
-module.exports.getHello = function() {
-  return hellos[Math.floor(Math.random() * hellos.length)]
-}
-module.exports.getSorry = function() {
-  return sorrys[Math.floor(Math.random() * sorrys.length)]
-}
-module.exports.getGoodbye = function() {
-  return goodbyes[Math.floor(Math.random() * goodbyes.length)]
-}
+module.exports.getJoke = () => _.sample(jokes)
+module.exports.getHowAreYou = () => _.sample(howAreYous)
+module.exports.getYoureWelcome = () => _.sample(youreWelcomes)
+module.exports.getCompliment = () => _.sample(compliments)
+module.exports.getThankYou = () => _.sample(thankYous)
+module.exports.getIDontKnow = () => _.sample(IDontKnows)
+module.exports.getCool = () => _.sample(cools)
+module.exports.getHello = () => _.sample(hellos)
+module.exports.getSorry = () => _.sample(sorrys)
+module.exports.getGoodbye = () => _.sample(goodbyes)

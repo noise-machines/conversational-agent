@@ -1,8 +1,7 @@
 {
   "name": "Neona",
   "version": "0.0.2",
-  "description":
-    "This conversational agent will help people understand artificial intelligence.",
+  "description": "This conversational agent will help people understand artificial intelligence.",
   "main": "index.js",
   "dependencies": {
     "bluebird": "^3.4.6",
@@ -32,7 +31,11 @@
     "type": "git",
     "url": "https://github.com/praeducer/conversational-agent"
   },
-  "keywords": ["chat", "bot", "conversational"],
+  "keywords": [
+    "chat",
+    "bot",
+    "conversational"
+  ],
   "author": "Paul Prae and C. Thomas Bailey",
   "contributors": [],
   "license": ""

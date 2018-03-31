@@ -9,14 +9,14 @@ const handleSearchResponse = (session, response) => {
     const entries = countResults === 1 ? 'entry' : 'entries'
     builder.Prompts.confirm(
       session,
-      `I'm not sure what you meant, but my knowledge base has ${countResults} ${
-        entries
-      } related to ${session.message.text}. Should I show them?`
+      `I'm not sure what you meant, but my knowledge base has ${countResults} ${entries} related to "${
+        session.message.text
+      }". Should I show them?`
     )
   } else {
     session.send({
       text:
-        "Sorry, didn't catch that. Was working on a cost function for Calvinball.",
+        "Sorry, I didn't understand. Too busy thinking about a cost function for Calvinball.",
       attachments: [
         {
           contentType: 'image/png',

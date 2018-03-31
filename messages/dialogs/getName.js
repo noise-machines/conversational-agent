@@ -3,7 +3,7 @@ const isProbablyAmericanName = require('is-probably-american-name')
 
 const getName = [
   session => {
-    builder.Prompts.text(session, 'Name, please?')
+    builder.Prompts.text(session, 'Name, please? (First name is fine.)')
   },
   (session, results, next) => {
     const name = results.response

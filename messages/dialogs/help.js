@@ -7,6 +7,9 @@ const help = [
     session.send(
       `Or say "tutorial" and I'll be slightly miffed that you don't even remember the first time we met.`
     )
+    session.send(
+      'I also know how to handle a little small talk. I can respond to compliments, thank yous, and the like. I can also tell jokes.'
+    )
     session.endDialog()
   }
 ]

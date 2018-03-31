@@ -13,30 +13,28 @@ const builder = require('botbuilder')
 const botBuilderAzure = require('botbuilder-azure')
 const restify = require('restify')
 const minutesBetweenPreviousAndCurrentMessage = require('./middleware/minutesBetweenPreviousAndCurrentMessage')
-// const {
-//   getJoke,
-//   getHowAreYou,
-//   getYoureWelcome,
-//   getCompliment,
-//   getThankYou,
-//   getIDontKnow,
-//   getCool,
-//   getHello,
-//   getSorry,
-//   getGoodbye,
-//   searchSynonyms,
-//   simpleHelpOptions
-// } = require('./utterances')
+const {
+  allResults: tutorialSearchResults
+} = require('./dialogs/tutorial/searchResults')
+const {
+  getJoke,
+  getHowAreYou,
+  getYoureWelcome,
+  getCompliment,
+  getThankYou,
+  getCool,
+  getGoodbye
+} = require('./utterances')
 const useEmulator = process.env.NODE_ENV === 'development'
 
 const connector = useEmulator
   ? new builder.ChatConnector()
   : new botBuilderAzure.BotServiceConnector({
-      appId: process.env.MICROSOFT_APP_ID,
-      appPassword: process.env.MICROSOFT_APP_PASSWORD,
-      stateEndpoint: process.env.BOT_STATE_ENDPOINT,
-      openIdMetadata: process.env.BOT_OPEN_ID_METADATA
-    })
+    appId: process.env.MICROSOFT_APP_ID,
+    appPassword: process.env.MICROSOFT_APP_PASSWORD,
+    stateEndpoint: process.env.BOT_STATE_ENDPOINT,
+    openIdMetadata: process.env.BOT_OPEN_ID_METADATA
+  })
 
 const TIMEOUT_IN_MINUTES = 10
 const bot = new builder.UniversalBot(connector)
@@ -71,14 +69,14 @@ const trySaveArticle = (session, args) => {
 
   const selectedKey = session.message.text
   var hit = null
+  var results = []
   if (session.userData.searchResponses) {
     const nestedResults = session.userData.searchResponses.map(
       response => response.results
     )
-    const results = _.flatten(nestedResults)
-
-    hit = _.find(results, { key: selectedKey })
+    results = _.flatten(nestedResults)
   }
+  hit = _.find([...results, ...tutorialSearchResults], { key: selectedKey })
   // Couldn't find the key in the latest search results, so don't save anything.
   if (!hit) {
     return false
@@ -143,6 +141,27 @@ const intents = new builder.IntentDialog({ recognizers: [recognizer] })
       session.send('Hi anon.')
     }
   })
+  .matches('Compliment', (session, args) => {
+    session.send(getCompliment())
+  })
+  .matches('HowAreYou?', (session, args) => {
+    session.send(getHowAreYou())
+  })
+  .matches('Joke', (session, args) => {
+    session.send(getJoke())
+  })
+  .matches('YoureWelcome', (session, args) => {
+    session.send(getYoureWelcome())
+  })
+  .matches('Goodbye', (session, args) => {
+    session.send(getGoodbye())
+  })
+  .matches('Cool', (session, args) => {
+    session.send(getCool())
+  })
+  .matches('ThankYou', (session, args) => {
+    session.send(getThankYou())
+  })
   .onDefault((session, args) => {
     const didSave = trySaveArticle(session, args)
     if (!didSave) {
@@ -187,30 +206,6 @@ var intents = new builder.IntentDialog({ recognizers: [recognizer] })
     )
     session.endDialog()
   })
-  .matches('Compliment', (session, args) => {
-    session.send(getCompliment())
-  })
-  .matches('HowAreYou?', (session, args) => {
-    session.send(getHowAreYou())
-  })
-  .matches('Joke', (session, args) => {
-    session.send(getJoke())
-  })
-  .matches('YoureWelcome', (session, args) => {
-    session.send(getYoureWelcome())
-  })
-  .matches('Goodbye', (session, args) => {
-    session.send(getGoodbye())
-  })
-  .matches('Sorry', (session, args) => {
-    session.send(getSorry())
-  })
-  .matches('Cool', (session, args) => {
-    session.send(getCool())
-  })
-  .matches('ThankYou', (session, args) => {
-    session.send(getThankYou())
-  })
   .matches('IDontKnow', (session, args) => {
     session.send(getIDontKnow())
   })
@@ -233,5 +228,10 @@ if (useEmulator) {
   })
   emulatorServer.post('/api/messages', connector.listen())
 } else {
+  console.log(
+    `Note: NODE_ENV was set to ${
+      process.env.NODE_ENV
+    }. If you want to run a dev server, make sure NODE_ENV is set to development in your .env file.`
+  )
   module.exports = { default: connector.listen() }
 }
