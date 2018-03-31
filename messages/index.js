@@ -52,7 +52,7 @@ require('./prompts/heckleAndMoveOn')(bot)
 
 // Register dialogs
 require('./dialogs/welcomeBack')(bot)
-require('./dialogs/tutorial')(bot)
+require('./dialogs/tutorial/index')(bot)
 require('./dialogs/restartTutorial')(bot)
 require('./dialogs/help')(bot)
 require('./dialogs/searchConcept')(bot)
